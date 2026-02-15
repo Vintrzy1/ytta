@@ -1,2 +1,5 @@
-8223850482:AAEiTRX9TduTyEmLdiuyeb_tQzlG9h4S58
-8335716552:AAHLyFftSVg3byPUIuJw0nbq8QAToj3UxGg
+{
+  "tokens": [
+    "8335716552:AAHLyFftSVg3byPUIuJw0nbq8QAToj3UxGg"
+  ]
+}
