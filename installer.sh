@@ -22,7 +22,28 @@ read -p "Masukkan pilihan Anda [1-4]: " MENU_OPTION
 
 case $MENU_OPTION in
   1)
-    echo "⚙️ Memulai Instalasi Panel Reviactyl..."
+    clear
+    echo "========================================================="
+    echo "📝 INFORMASI INSTALASI PANEL"
+    echo "========================================================="
+    read -p "🌐 Masukkan Domain / IP (contoh: panel.vintrzy.com): " PANEL_DOMAIN
+    read -p "📧 Masukkan Email Admin (untuk sistem): " ADMIN_EMAIL
+    
+    echo ""
+    read -p "🗄️  Nama Database [default: panel]: " DB_NAME
+    DB_NAME=${DB_NAME:-panel} # Jika kosong, pakai 'panel'
+    
+    read -p "👤 Username Database [default: reviactyl]: " DB_USER
+    DB_USER=${DB_USER:-reviactyl} # Jika kosong, pakai 'reviactyl'
+    
+    read -p "🔑 Password Database (wajib diisi!): " DB_PASS
+    while [[ -z "$DB_PASS" ]]; do
+        read -p "   ⚠️ Password tidak boleh kosong! Masukkan Password Database: " DB_PASS
+    done
+
+    echo "========================================================="
+    echo "⚙️ Memulai Instalasi... Silakan tunggu sambil ngopi ☕"
+    echo "========================================================="
     sleep 2
     
     # Update & Install Dependencies
@@ -35,28 +56,30 @@ case $MENU_OPTION in
     npm install -g yarn
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-    # Setup Panel & Database
+    # Setup Direktori & Download Panel
     rm -rf /var/www/reviactyl && mkdir -p /var/www/reviactyl && cd /var/www/reviactyl
     git clone https://github.com/reviactyl/panel.git .
     cp .env.example .env
     chmod -R 755 storage/* bootstrap/cache/
     
+    # Setup Database Dinamis (sesuai input pengguna)
     systemctl start mariadb
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS panel;"
-    mysql -u root -e "CREATE USER IF NOT EXISTS 'reviactyl'@'127.0.0.1' IDENTIFIED BY 'vintrzy123';"
-    mysql -u root -e "GRANT ALL PRIVILEGES ON panel.* TO 'reviactyl'@'127.0.0.1' WITH GRANT OPTION;"
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
+    mysql -u root -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
+    mysql -u root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
     mysql -u root -e "FLUSH PRIVILEGES;"
 
+    # Build Sistem
     export COMPOSER_ALLOW_SUPERUSER=1
     composer install --no-dev --optimize-autoloader
     yarn install && yarn build:production
 
-    # Setup Nginx
+    # Setup Nginx Dinamis (sesuai input pengguna)
     rm -f /etc/nginx/sites-enabled/default
     cat << 'EOF' > /etc/nginx/sites-available/reviactyl.conf
 server {
     listen 80;
-    server_name _;
+    server_name <DOMAIN>;
     root /var/www/reviactyl/public;
     index index.html index.htm index.php;
     charset utf-8;
@@ -82,23 +105,35 @@ server {
     location ~ /\.ht { deny all; }
 }
 EOF
+    # Inject Domain ke Nginx
+    sed -i "s/<DOMAIN>/$PANEL_DOMAIN/g" /etc/nginx/sites-available/reviactyl.conf
     ln -s /etc/nginx/sites-available/reviactyl.conf /etc/nginx/sites-enabled/reviactyl.conf
     systemctl restart nginx
     
+    # Setup Cronjob
     (crontab -l 2>/dev/null; echo "* * * * * php /var/www/reviactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
     
     echo "========================================================="
-    echo "⚠️ TAHAP AKHIR PANEL: Siapkan Environment & Akun Admin!"
-    echo "Info Database: Host=127.0.0.1 | Port=3306 | DB=panel | User=reviactyl | Pass=vintrzy123"
+    echo "⚙️ MENGONFIGURASI ENVIRONMENT & DATABASE..."
     echo "========================================================="
+    # Inject konfigurasi otomatis tanpa interaksi
     php artisan key:generate --force
-    php artisan p:environment:setup
-    php artisan p:environment:database
+    php artisan p:environment:setup --author="$ADMIN_EMAIL" --url="http://$PANEL_DOMAIN" --timezone="Asia/Jakarta" --cache="redis" --session="redis" --queue="redis"
+    php artisan p:environment:database --host="127.0.0.1" --port="3306" --database="$DB_NAME" --username="$DB_USER" --password="$DB_PASS"
     php artisan migrate --seed --force
+    
+    echo "========================================================="
+    echo "👤 BUAT AKUN ADMIN PANEL"
+    echo "========================================================="
+    # Bagian ini tetap dibiarkan manual agar pengguna bisa membuat nama dan password login panel
     php artisan p:user:make
+    
     chown -R www-data:www-data /var/www/reviactyl/*
     
-    echo "✅ INSTALL PANEL SELESAI! Buka IP VPS di browser."
+    echo "========================================================="
+    echo "✅ INSTALL PANEL SELESAI!"
+    echo "🌐 Buka browser Anda: http://$PANEL_DOMAIN"
+    echo "========================================================="
     ;;
     
   2)
@@ -130,7 +165,7 @@ RestartSec=5s
 WantedBy=multi-user.target
 EOF
     systemctl enable wings
-    echo "✅ INSTALL WINGS SELESAI! Jangan lupa buat Node di Panel, lalu paste konfigurasi Wings ke /etc/pterodactyl/config.yml dan jalankan: systemctl start wings"
+    echo "✅ INSTALL WINGS SELESAI! Paste konfigurasi Node dari Panel ke /etc/pterodactyl/config.yml lalu jalankan: systemctl start wings"
     ;;
     
   3)
@@ -145,8 +180,8 @@ EOF
         rm -rf /etc/pterodactyl
         rm -f /usr/local/bin/wings
         rm -f /etc/systemd/system/wings.service
-        mysql -u root -e "DROP DATABASE IF EXISTS panel;"
-        mysql -u root -e "DROP USER IF EXISTS 'reviactyl'@'127.0.0.1';"
+        mysql -u root -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`;"
+        mysql -u root -e "DROP USER IF EXISTS '${DB_USER}'@'127.0.0.1';"
         systemctl daemon-reload
         systemctl restart nginx
         echo "✅ UNINSTALL SELESAI! Server sudah bersih."
