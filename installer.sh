@@ -434,41 +434,6 @@ EOF
   exit 0
 }
 
-# Fungsi Baru: Install Panel Auto
-install_panel() {
-  echo -e "                                                       "
-  echo -e "${BLUE}[+] =============================================== [+]${NC}"
-  echo -e "${BLUE}[+]                    INSTALL PANEL AUTO              [+]${NC}"
-  echo -e "${BLUE}[+] =============================================== [+]${NC}"
-  echo -e "                                                       "
-  
-  # Minta input domain saja di awal
-  read -p "Masukkan Domain: " domain
-
-  echo -e "${YELLOW}Memulai instalasi panel...${NC}"
-  
-  # Jalankan installer dengan jawaban otomatis (<<EOF)
-  # CATATAN: Jika urutan pertanyaan dari installer.sh Anda berbeda,
-  # silakan ubah urutan baris di bawah ini.
-  bash <(curl -s https://pterodactyl-installer.se) <<EOF
-1
-$domain
-admin@vin.kece
-admin
-admin
-admin
-admin123
-EOF
-
-  echo -e "                                                       "
-  echo -e "${GREEN}[+] =============================================== [+]${NC}"
-  echo -e "${GREEN}[+]                 INSTALL PANEL SELESAI              [+]${NC}"
-  echo -e "${GREEN}[+] =============================================== [+]${NC}"
-  echo -e "                                                       "
-  sleep 2
-  clear
-}
-
 # Main script
 display_welcome
 install_jq
@@ -503,9 +468,8 @@ while true; do
   echo "6. Stellar Theme"
   echo "7. Hack Back Panel"
   echo "8. Ubah Pw Vps"
-  echo "9. Install Panel Auto"
   echo "x. Exit"
-  echo -e "Masukkan pilihan 1/2/3/4/5/6/7/8/9/x:"
+  echo -e "Masukkan pilihan 1/2/3/4/5/6/7/8/x:"
   read -r MENU_CHOICE
   clear
 
@@ -518,7 +482,6 @@ while true; do
     6) install_themeSteeler ;;
     7) hackback_panel ;;
     8) ubahpw_vps ;;
-    9) install_panel ;;
     x)
       echo "Keluar dari skrip."
       exit 0
