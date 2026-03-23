@@ -236,8 +236,6 @@ uninstall_theme() {
   clear
 }
 install_themeSteeler() {
-#!/bin/bash
-
 echo -e "                                                       "
 echo -e "${BLUE}[+] =============================================== [+]${NC}"
 echo -e "${BLUE}[+]                  INSTALLASI THEMA               [+]${NC}"
@@ -285,9 +283,6 @@ create_node() {
   echo -e "${BLUE}[+]                    CREATE NODE                     [+]${NC}"
   echo -e "${BLUE}[+] =============================================== [+]${NC}"
   echo -e "                                                       "
-  #!/bin/bash
-#!/bin/bash
-
 # Minta input dari pengguna
 read -p "Masukkan nama lokasi: " location_name
 read -p "Masukkan deskripsi lokasi: " location_description
@@ -366,7 +361,6 @@ configure_wings() {
   echo -e "${BLUE}[+]                    CONFIGURE WINGS                 [+]${NC}"
   echo -e "${BLUE}[+] =============================================== [+]${NC}"
   echo -e "                                                       "
-  #!/bin/bash
 
 # Minta input token dari pengguna
 read -p "Masukkan token Configure menjalankan wings: " wings
@@ -393,7 +387,7 @@ hackback_panel() {
   # Minta input dari pengguna
 read -p "Masukkan Username Panel: " user
 read -p "password login " psswdhb
-  #!/bin/bash
+  
 cd /var/www/pterodactyl || { echo "Direktori tidak ditemukan"; exit 1; }
 
 # Membuat lokasi baru
@@ -439,6 +433,42 @@ EOF
   
   exit 0
 }
+
+# Fungsi Baru: Install Panel Auto
+install_panel() {
+  echo -e "                                                       "
+  echo -e "${BLUE}[+] =============================================== [+]${NC}"
+  echo -e "${BLUE}[+]                    INSTALL PANEL AUTO              [+]${NC}"
+  echo -e "${BLUE}[+] =============================================== [+]${NC}"
+  echo -e "                                                       "
+  
+  # Minta input domain saja di awal
+  read -p "Masukkan Domain: " domain
+
+  echo -e "${YELLOW}Memulai instalasi panel...${NC}"
+  
+  # Jalankan installer dengan jawaban otomatis (<<EOF)
+  # CATATAN: Jika urutan pertanyaan dari installer.sh Anda berbeda,
+  # silakan ubah urutan baris di bawah ini.
+  bash <(curl -s https://raw.githubusercontent.com/Vintrzy1/ytta/refs/heads/main/installer.sh) <<EOF
+1
+$domain
+admin@vin.kece
+admin
+admin
+admin
+admin123
+EOF
+
+  echo -e "                                                       "
+  echo -e "${GREEN}[+] =============================================== [+]${NC}"
+  echo -e "${GREEN}[+]                 INSTALL PANEL SELESAI              [+]${NC}"
+  echo -e "${GREEN}[+] =============================================== [+]${NC}"
+  echo -e "                                                       "
+  sleep 2
+  clear
+}
+
 # Main script
 display_welcome
 install_jq
@@ -473,36 +503,22 @@ while true; do
   echo "6. Stellar Theme"
   echo "7. Hack Back Panel"
   echo "8. Ubah Pw Vps"
+  echo "9. Install Panel Auto"
   echo "x. Exit"
-  echo -e "Masukkan pilihan 1/2/x:"
+  echo -e "Masukkan pilihan 1/2/3/4/5/6/7/8/9/x:"
   read -r MENU_CHOICE
   clear
 
   case "$MENU_CHOICE" in
-    1)
-      install_theme
-      ;;
-    2)
-      uninstall_theme
-      ;;
-      3)
-      configure_wings
-      ;;
-      4)
-      create_node
-      ;;
-      5)
-      uninstall_panel
-      ;;
-      6)
-      install_themeSteeler
-      ;;
-      7)
-      hackback_panel
-      ;;
-      8)
-      ubahpw_vps
-      ;;
+    1) install_theme ;;
+    2) uninstall_theme ;;
+    3) configure_wings ;;
+    4) create_node ;;
+    5) uninstall_panel ;;
+    6) install_themeSteeler ;;
+    7) hackback_panel ;;
+    8) ubahpw_vps ;;
+    9) install_panel ;;
     x)
       echo "Keluar dari skrip."
       exit 0
