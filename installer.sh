@@ -438,19 +438,17 @@ EOF
 install_panel() {
   echo -e "                                                       "
   echo -e "${BLUE}[+] =============================================== [+]${NC}"
-  echo -e "${BLUE}[+]                    INSTALL PANEL AUTO              [+]${NC}"
+  echo -e "${BLUE}[+]                    INSTALL PANEL AUTO               [+]${NC}"
   echo -e "${BLUE}[+] =============================================== [+]${NC}"
   echo -e "                                                       "
   
   # Minta input domain saja di awal
   read -p "Masukkan Domain: " domain
 
-  echo -e "${YELLOW}Memulai instalasi panel...${NC}"
+  echo -e "${YELLOW}Memulai instalasi panel di domain $domain...${NC}"
   
   # Jalankan installer dengan jawaban otomatis (<<EOF)
-  # CATATAN: Jika urutan pertanyaan dari installer.sh Anda berbeda,
-  # silakan ubah urutan baris di bawah ini.
- bash <(curl -s https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer/master/install.sh) <<EOF
+  bash <(curl -s https://pterodactyl-installer.se) <<EOF
 0
 $domain
 y
@@ -469,7 +467,7 @@ EOF
 
   echo -e "                                                       "
   echo -e "${GREEN}[+] =============================================== [+]${NC}"
-  echo -e "${GREEN}[+]                 INSTALL PANEL SELESAI              [+]${NC}"
+  echo -e "${GREEN}[+]                 INSTALL PANEL SELESAI               [+]${NC}"
   echo -e "${GREEN}[+] =============================================== [+]${NC}"
   echo -e "                                                       "
   sleep 2
