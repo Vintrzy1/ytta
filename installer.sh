@@ -450,7 +450,7 @@ install_panel() {
   # Jalankan installer dengan jawaban otomatis (<<EOF)
   # CATATAN: Jika urutan pertanyaan dari installer.sh Anda berbeda,
   # silakan ubah urutan baris di bawah ini.
-  bash <(curl -s https://raw.githubusercontent.com/Vintrzy1/ytta/refs/heads/main/installer.sh) <<EOF
+  bash <(curl -s https://pterodactyl-installer.se) <<EOF
 1
 $domain
 admin@vin.kece
